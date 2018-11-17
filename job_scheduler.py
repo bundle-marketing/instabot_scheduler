@@ -48,7 +48,7 @@ def get_all_bot_credentials():
 
 	key = {"can_mine" : True}
 
-	return insta_cred_coll.find(key)
+	return list(insta_cred_coll.find(key))
 
 
 def get_bot_credentials(username):
@@ -147,7 +147,7 @@ def main():
 	while True:
 		schedule_jobs()
 		print("Going to sleep")
-		time.sleep(2 * 60)
+		time.sleep(60)
 
 
 if __name__ == '__main__':

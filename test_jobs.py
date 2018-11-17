@@ -42,7 +42,7 @@ def get_user_data(ig_username):
 	return records[0]
 
 
-def get_config(id, table_name=TABLES["INFLUENCER_CONFIG"]):
+def get_config(id, table_name=TABLES["UPDATE_FOLLOW_CONFIG"]):
 	config_coll = db[table_name]
 
 
@@ -59,6 +59,7 @@ def get_config(id, table_name=TABLES["INFLUENCER_CONFIG"]):
 
 if __name__ == '__main__':
 	count = 0
+	zero_count = 0
 	unique_users = []
 	for rec in get_job_record():
 
@@ -67,11 +68,17 @@ if __name__ == '__main__':
 
 		config = get_config(rec["linked_job_id"])
 
-		data = get_user_data(config["ig_username"])
+		if config == None:
+			continue
+
+		data = get_user_data(config["target_ig_username"])
+
+		if data == None:
+			continue
 
 		if len(data["follower"]) == 0:
-			print(config)
 			print(data)
+			zero_count += 1
 		else:
 			print(len(data["follower"]))
 		
@@ -81,7 +88,9 @@ if __name__ == '__main__':
 		for med in data["media"]:
 			unique_users.extend(med["likers"])
 
+	print("Totoal count ", count)
 	print("Unique users ", len(set(unique_users)))
+	print("Users wwith 0 followers ", zero_count)
 			# print(config["ig_username"])
 
 

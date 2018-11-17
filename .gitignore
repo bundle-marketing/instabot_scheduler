@@ -108,3 +108,5 @@ venv.bak/
 #added
 
 config.py
+run_commands_no_commit
+
