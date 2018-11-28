@@ -11,9 +11,8 @@ from bson.objectid import ObjectId
 import docker
 
 
-from config import (MONGO_DB_URL, MONGO_DB_NAME, TABLES)
-
-
+sys.path.append(os.path.join(sys.path[0], '../'))
+from db_config.config import (MONGO_DB_URL, MONGO_DB_NAME, TABLES)
 
 
 ### Setup database ####
@@ -138,20 +137,17 @@ def schedule_jobs():
 
 			if cred_to_use == None:
 				continue
-			
-			running_cred.add(cred_to_use["ig_username"])
 
 
 		else:
 
 			if len(valid_cred) > 0:
-				cred_to_use = valid_cred[-1]
-				running_cred.add(cred_to_use["ig_username"])
-				valid_cred.pop()
-
+				cred_to_use = valid_cred.pop()
+				
 			else:
-				continue
+				break
 
+		running_cred.add(cred_to_use["ig_username"])
 		schedule_job_now(job_id=str(job["_id"]), cred_to_use=cred_to_use, job_type=str(job["type"]))
 
 

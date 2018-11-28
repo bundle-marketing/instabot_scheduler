@@ -8,9 +8,10 @@ import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-from config import (MONGO_DB_URL, MONGO_DB_NAME, TABLES)
-
 from collections import Counter 
+
+sys.path.append(os.path.join(sys.path[0], '../'))
+from db_config.config import (MONGO_DB_URL, MONGO_DB_NAME, TABLES)
 
 
 
@@ -202,7 +203,7 @@ def create_job_record(job_type, linked_job_id, specific_username=None, weight=0)
 
 def check_pending_activity():
 
-	### Checking active_influencers
+	### Checking which influencer data to capture
 
 	for record in get_active_influencer_config():
 
@@ -212,9 +213,9 @@ def check_pending_activity():
 		update_active_influencer_config(record)
 
 
-	for record in get_active_follow_config():
+	### Updating ig_user's user_follow table
 
-		continue
+	for record in get_active_follow_config():
 
 		user_record = get_user_data(ig_username=record["target_ig_username"])
 		download_data = True
@@ -247,8 +248,7 @@ def check_pending_activity():
 			update_active_follow_config(record)
 
 
-	## TODO: get_active_user_activity
-
+	### Getting ig_user's next_follow, next_unfollow, next_like
 	timestamp = get_current_time()
 
 	for record in get_active_user_activity(timestamp=timestamp):
@@ -276,43 +276,11 @@ def check_pending_activity():
 		update_user_activity(record)
 
 
-
-
-
-	
-
-
 if __name__ == '__main__':
 	while True:
 		check_pending_activity()
 		print("Going to sleep")
 		time.sleep(2 * 60)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

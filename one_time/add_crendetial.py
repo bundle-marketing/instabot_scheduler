@@ -8,7 +8,8 @@ import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-from config import (MONGO_DB_URL, MONGO_DB_NAME, TABLES)
+sys.path.append(os.path.join(sys.path[0], '../'))
+from db_config.config import (MONGO_DB_URL, MONGO_DB_NAME, TABLES)
 
 from collections import Counter 
 
