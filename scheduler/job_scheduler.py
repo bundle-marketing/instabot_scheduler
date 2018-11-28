@@ -163,7 +163,7 @@ def main():
 	while True:
 		schedule_jobs()
 		print("Going to sleep")
-		time.sleep(60)
+		time.sleep(30)
 
 
 if __name__ == '__main__':

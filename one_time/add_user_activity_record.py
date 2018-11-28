@@ -41,11 +41,11 @@ data["next_unfollow_ts"] = ts
 
 
 key = {}
-key["user_name"] = "melrose"
-key["ig_username"] = "melrosethriftco"
+key["user_name"] = data["user_name"]
+key["ig_username"] = data["ig_username"]
 
 
 
 # config_coll.remove({})
-config_coll.update(key, data)
+config_coll.replace_one(key, data, upsert=True)
 

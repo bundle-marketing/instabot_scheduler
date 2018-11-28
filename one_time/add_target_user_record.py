@@ -56,7 +56,15 @@ for user in target_usernames:
 	data["media"]["likers"] = True
 	data["media"]["comment"] = False
 
-	update_follow_coll.insert_one(data)
+	key = {}
+
+	key["user_name"] = data["user_name"]
+	key["ig_username"] = data["ig_username"]
+	key["target_ig_username"] = data["target_ig_username"]
+
+
+
+	update_follow_coll.replace_one(key, data, upsert=True)
 
 
 

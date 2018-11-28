@@ -40,7 +40,7 @@ def update_active_influencer_config(data):
 	config_coll = mongo_db[TABLES["INFLUENCER_CONFIG"]]
 
 	key = {"_id" : data["_id"]}
-	config_coll.update(key, data)
+	config_coll.replace_one(key, data)
 
 
 def get_user_data(ig_username):
@@ -66,7 +66,7 @@ def update_active_follow_config(data):
 	config_coll = mongo_db[TABLES["UPDATE_FOLLOW_CONFIG"]]
 
 	key = {"_id" : data["_id"]}
-	config_coll.update(key, data)
+	config_coll.replace_one(key, data)
 
 
 
@@ -99,7 +99,7 @@ def update_user_follow(data):
 	user_follow_coll = mongo_db[TABLES["USER_FOLLOW"]]
 
 	key = {"_id" : data["_id"]}
-	user_follow_coll.update(key, data)
+	user_follow_coll.replace_one(key, data)
 
 
 
@@ -171,7 +171,7 @@ def update_user_activity(data):
 	config_coll = mongo_db[TABLES["USER_ACTIVITY"]]
 
 	key = {"_id" : data["_id"]}
-	config_coll.update(key, data)
+	config_coll.replace_one(key, data)
 
 
 
@@ -280,7 +280,7 @@ if __name__ == '__main__':
 	while True:
 		check_pending_activity()
 		print("Going to sleep")
-		time.sleep(2 * 60)
+		time.sleep(30)
 
 
 

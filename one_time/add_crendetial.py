@@ -20,20 +20,25 @@ from collections import Counter
 mongo_client = MongoClient(MONGO_DB_URL)
 mongo_db = mongo_client[MONGO_DB_NAME]
 
-
-
-data = {}
-
-data["ig_username"] = "melrosethriftco"
-data["ig_password"] = "Rocco1224"
-data["can_mine"] = False
-data["proxy"] = "104.140.211.13:3128"
-
-key = {}
-key["ig_username"] = "melrosethriftco"
-
-
-
 cred_coll = mongo_db[TABLES["IG_CRED"]]
 
-cred_coll.update(key, data)
+
+with open('credential.json') as f:
+	cred_data = json.load(f)
+
+	for username, details in cred_data.items():
+
+
+		data = {}
+
+		data["ig_username"] = username
+		data["ig_password"] = details[0]
+		data["proxy"] = details[1]
+
+		data["can_mine"] = details[2]
+		
+
+		key = {}
+		key["ig_username"] = username
+
+		cred_coll.replace_one(key, data, upsert=True)
