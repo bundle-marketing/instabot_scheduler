@@ -23,13 +23,16 @@ mongo_db = mongo_client[MONGO_DB_NAME]
 
 data = {}
 
-data["ig_username"] = "finallyarbaaz"
-data["ig_password"] = "TrashIt420"
-data["can_mine"] = True
-data["proxy"] = "173.234.232.164:3128"
+data["ig_username"] = "melrosethriftco"
+data["ig_password"] = "Rocco1224"
+data["can_mine"] = False
+data["proxy"] = "104.140.211.13:3128"
+
+key = {}
+key["ig_username"] = "melrosethriftco"
 
 
 
 cred_coll = mongo_db[TABLES["IG_CRED"]]
 
-cred_coll.insert_one(data)
+cred_coll.update(key, data)

@@ -74,7 +74,7 @@ def get_running_jobs():
 	return ( set(running_cred), set(running_jobs))
 
 
-def schedule_job_now(job_id, cred_to_use):
+def schedule_job_now(job_id, cred_to_use, job_type):
 	if cred_to_use == None:
 		return
 
@@ -87,8 +87,11 @@ def schedule_job_now(job_id, cred_to_use):
 
 	}
 
+	print(environment_var)
+
 	container_name = str(job_id) + "_" +  environment_var["USERNAME"]
 
+	print("This job is of type " + job_type)
 	print("Going to run job " + container_name)
 
 	docker_client.containers.run(image=IMAGE_NAME, 
@@ -122,13 +125,22 @@ def schedule_jobs():
 
 		cred_to_use = None
 
-		if job["type"] == "follow" or job["type"] == "unfollow" or job["type"] == "hashtag":
+		if job["type"] == "follow" or job["type"] == "unfollow" or job["type"] == "like_hashtag":
 
 			# BOt credentials must be same as user_owened IG
 			if "specific_username" not in job or job["specific_username"] in running_cred:
 				continue
 
+			if job["specific_username"] in running_cred:
+				continue
+
 			cred_to_use = get_bot_credentials(job["specific_username"])
+
+			if cred_to_use == None:
+				continue
+			
+			running_cred.add(cred_to_use["ig_username"])
+
 
 		else:
 
@@ -140,7 +152,7 @@ def schedule_jobs():
 			else:
 				continue
 
-		schedule_job_now(job_id=str(job["_id"]), cred_to_use=cred_to_use)
+		schedule_job_now(job_id=str(job["_id"]), cred_to_use=cred_to_use, job_type=str(job["type"]))
 
 
 def main():

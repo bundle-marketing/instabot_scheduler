@@ -151,19 +151,27 @@ def refresh_user_follow(follow_config_record, user_record):
 			update_user_follow(data)
 
 
-def get_active_user_activity():
+def get_active_user_activity(timestamp):
 
 	config_coll = mongo_db[TABLES["USER_ACTIVITY"]]
 
 	key = {
 		"$or":[ 
-			{"next_like_ts":{"$lt": get_current_time()}}, 
-			{"next_follow_ts":{"$lt": get_current_time()}}, 
-			{"next_unfollow_ts":{"$lt": get_current_time()}}
+			{"next_like_ts":{"$lt": timestamp}}, 
+			{"next_follow_ts":{"$lt": timestamp}}, 
+			{"next_unfollow_ts":{"$lt": timestamp}}
 		]
 	}
 
-	return config_coll.find(key)
+	return list(config_coll.find(key))
+
+def update_user_activity(data):
+
+	config_coll = mongo_db[TABLES["USER_ACTIVITY"]]
+
+	key = {"_id" : data["_id"]}
+	config_coll.update(key, data)
+
 
 
 def create_job_record(job_type, linked_job_id, specific_username=None, weight=0):
@@ -191,6 +199,7 @@ def create_job_record(job_type, linked_job_id, specific_username=None, weight=0)
 
 
 
+
 def check_pending_activity():
 
 	### Checking active_influencers
@@ -204,6 +213,8 @@ def check_pending_activity():
 
 
 	for record in get_active_follow_config():
+
+		continue
 
 		user_record = get_user_data(ig_username=record["target_ig_username"])
 		download_data = True
@@ -236,8 +247,39 @@ def check_pending_activity():
 			update_active_follow_config(record)
 
 
-
 	## TODO: get_active_user_activity
+
+	timestamp = get_current_time()
+
+	for record in get_active_user_activity(timestamp=timestamp):
+
+		if "next_like_ts" in record and "like_delay" in record and record["next_like_ts"] < timestamp:
+
+			print("Adding like hashtag job")
+			create_job_record(job_type="like_hashtag", linked_job_id=record["_id"], specific_username=record["ig_username"])
+			record["next_like_ts"] = timestamp + (record["like_delay"] * 60)
+
+
+		if "next_follow_ts" in record and "follow_delay" in record and record["next_follow_ts"] < timestamp:
+
+			print("Adding follow user job")
+			create_job_record(job_type="follow", linked_job_id=record["_id"], specific_username=record["ig_username"])
+			record["next_follow_ts"] = timestamp + (record["follow_delay"] * 60)
+
+
+		if "next_unfollow_ts" in record and "unfollow_delay" in record and record["next_unfollow_ts"] < timestamp:
+
+			print("Adding unfollow user job")
+			create_job_record(job_type="unfollow", linked_job_id=record["_id"], specific_username=record["ig_username"])
+			record["next_unfollow_ts"] = timestamp + (record["unfollow_delay"] * 60)
+
+		update_user_activity(record)
+
+
+
+
+
+	
 
 
 if __name__ == '__main__':
