@@ -77,21 +77,29 @@ def schedule_job_now(job_id, cred_to_use, job_type):
 	if cred_to_use == None:
 		return
 
-	environment_var = {
-		"JOB_ID" : str(job_id), 
-		
-		"USERNAME" : cred_to_use["ig_username"],
-		"PASSWORD" : cred_to_use["ig_password"],
-		"PROXY" : cred_to_use["proxy"]
+	try:
 
-	}
+		environment_var = {
+			"JOB_ID" : str(job_id), 
+			
+			"USERNAME" : cred_to_use["ig_username"],
+			"PASSWORD" : cred_to_use["ig_password"]
 
-	print(environment_var)
+		}
+
+	except:
+
+		return
+
+	if "proxy" in cred_to_use and len(cred_to_use["proxy"]) > 0:
+		environment_var["PROXY"] = cred_to_use["proxy"]
+
 
 	container_name = str(job_id) + "_" +  environment_var["USERNAME"]
 
 	print("This job is of type " + job_type)
 	print("Going to run job " + container_name)
+	print(environment_var)
 
 	docker_client.containers.run(image=IMAGE_NAME, 
 		command=IMAGE_COMMAND,
@@ -143,7 +151,7 @@ def schedule_jobs():
 
 			if len(valid_cred) > 0:
 				cred_to_use = valid_cred.pop()
-				
+
 			else:
 				break
 
