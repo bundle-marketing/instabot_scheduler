@@ -91,8 +91,8 @@ def schedule_job_now(job_id, cred_to_use, job_type):
 
 		return
 
-	if "proxy" in cred_to_use and len(cred_to_use["proxy"]) > 0:
-		environment_var["PROXY"] = cred_to_use["proxy"]
+	# if "proxy" in cred_to_use and len(cred_to_use["proxy"]) > 0:
+	# 	environment_var["PROXY"] = cred_to_use["proxy"]
 
 
 	container_name = str(job_id) + "_" +  environment_var["USERNAME"]

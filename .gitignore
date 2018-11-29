@@ -111,5 +111,7 @@ config.py
 run_commands_no_commit
 credential.json
 proxy.json
+to_track.json
 melrose/
+test.py
 

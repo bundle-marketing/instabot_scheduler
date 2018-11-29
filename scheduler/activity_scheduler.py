@@ -207,9 +207,11 @@ def check_pending_activity():
 
 	for record in get_active_influencer_config():
 
+		print("Adding grad_data job for username: ", record["ig_username"])
+
 		create_job_record(job_type="get_data", linked_job_id=record["_id"])
 
-		record["next_run_ts"] = get_current_time() + (record["delays_mins"] * 60)
+		record["next_run_ts"] = get_current_time() + (record["delay_mins"] * 60)
 		update_active_influencer_config(record)
 
 
