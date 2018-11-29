@@ -31,14 +31,14 @@ PORT_DICT = {'80/tcp': None}
 
 
 
-def check_pending_jobs():
+def check_pending_jobs(max_jobs=50):
 
 	job_config_coll = mongo_db[TABLES["JOB_CONFIG"]]
 
 	key = {"completion_time" : -1}
 	sort_key = [ ("weight", -1), ("release_time", 1) ]
 	
-	return list(job_config_coll.find(key).sort(sort_key))#.limit(max_jobs))
+	return list(job_config_coll.find(key).sort(sort_key).limit(max_jobs))
 
 
 def get_all_bot_credentials():
@@ -123,6 +123,9 @@ def schedule_jobs():
 			valid_cred.append(cred)
 
 	for job in pending_jobs:
+
+		# print((job["_id"]))
+
 		if str(job["_id"]) in running_jobs:
 			continue
 
@@ -153,7 +156,7 @@ def schedule_jobs():
 				cred_to_use = valid_cred.pop()
 
 			else:
-				break
+				continue
 
 		running_cred.add(cred_to_use["ig_username"])
 		schedule_job_now(job_id=str(job["_id"]), cred_to_use=cred_to_use, job_type=str(job["type"]))
