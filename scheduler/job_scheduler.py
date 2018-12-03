@@ -24,142 +24,62 @@ mongo_db = mongo_client[MONGO_DB_NAME]
 ### Setup docker client ####
 
 docker_client = docker.from_env()
-IMAGE_NAME = "instabot:latest"
-
-IMAGE_COMMAND = list("python3 bot/runner.py".split(' '))
-PORT_DICT = {'80/tcp': None}
-
-
 
 def check_pending_jobs(max_jobs=50):
 
 	job_config_coll = mongo_db[TABLES["JOB_CONFIG"]]
 
-	key = {"completion_time" : -1}
+	key = {"specific_username" : "" , "completion_time" : -1}
 	sort_key = [ ("weight", -1), ("release_time", 1) ]
 	
 	return list(job_config_coll.find(key).sort(sort_key).limit(max_jobs))
 
+def update_job_record(job_record):
 
-def get_all_bot_credentials():
+	print(job_record)
 
-	insta_cred_coll = mongo_db[TABLES["IG_CRED"]]
+	job_config_coll = mongo_db[TABLES["JOB_CONFIG"]]
 
-	key = {"can_mine" : True}
-
-	return list(insta_cred_coll.find(key))
-
-
-def get_bot_credentials(username):
-
-	insta_cred_coll = mongo_db[TABLES["IG_CRED"]]
-
-	key = {"ig_username" : username}
-
-	return list(insta_cred_coll.find(key))[0]
+	key = { "_id" : job_record["_id"]}
+	job_config_coll.replace_one(key, job_record)
 
 
-def get_running_jobs():
+
+def get_running_ig_mining_bots():
 	running_cred = []
-	running_jobs = []
 
 	for container in docker_client.containers.list():
-		##Container name = JOBID_CRED
-		job, cred  = container.name.split('_')
 
-		running_cred.append(cred)
-		running_jobs.append(job)
+		read_labels = container.labels
 
-	return ( set(running_cred), set(running_jobs))
+		if "bot_type" in read_labels and read_labels["bot_type"] == "instagram":
+			if "can_mine" in read_labels and read_labels["can_mine"] == "yes":
+				if "bot_username_in_use" in read_labels:
+					running_cred.append(read_labels["bot_username_in_use"])
+	
+	print(running_cred)
 
-
-def schedule_job_now(job_id, cred_to_use, job_type):
-	if cred_to_use == None:
-		return
-
-	try:
-
-		environment_var = {
-			"JOB_ID" : str(job_id), 
-			
-			"USERNAME" : cred_to_use["ig_username"],
-			"PASSWORD" : cred_to_use["ig_password"]
-
-		}
-
-	except:
-
-		return
-
-	# if "proxy" in cred_to_use and len(cred_to_use["proxy"]) > 0:
-	# 	environment_var["PROXY"] = cred_to_use["proxy"]
+	return running_cred
 
 
-	container_name = str(job_id) + "_" +  environment_var["USERNAME"]
-
-	print("This job is of type " + job_type)
-	print("Going to run job " + container_name)
-	print(environment_var)
-
-	docker_client.containers.run(image=IMAGE_NAME, 
-		command=IMAGE_COMMAND,
-		remove=True,
-		environment=environment_var,
-		name=container_name,
-		detach=True)
-
-
-
-
+## static global variable
+##TODO: Ensure faire round-bin
+# avail_cred = get_running_ig_mining_bots()
 
 def schedule_jobs():
-	running_cred, running_jobs = get_running_jobs()
-	pending_jobs = check_pending_jobs()
 
-	valid_cred = []
+	# global avail_cred
+	avail_cred = get_running_ig_mining_bots()
+	
 
-	for cred in get_all_bot_credentials():
-		if cred["ig_username"] not in running_cred:
-			valid_cred.append(cred)
+	for job in check_pending_jobs():
 
-	for job in pending_jobs:
+		if len(avail_cred) == 0:
+			# avail_cred = get_running_ig_mining_bots()
+			break
 
-		# print((job["_id"]))
-
-		if str(job["_id"]) in running_jobs:
-			continue
-
-		#TODO: Temp fix
-		if "ran_once" in job and job["ran_once"] == True:
-			continue
-
-		cred_to_use = None
-
-		if job["type"] == "follow" or job["type"] == "unfollow" or job["type"] == "like_hashtag":
-
-			# BOt credentials must be same as user_owened IG
-			if "specific_username" not in job or job["specific_username"] in running_cred:
-				continue
-
-			if job["specific_username"] in running_cred:
-				continue
-
-			cred_to_use = get_bot_credentials(job["specific_username"])
-
-			if cred_to_use == None:
-				continue
-
-
-		else:
-
-			if len(valid_cred) > 0:
-				cred_to_use = valid_cred.pop()
-
-			else:
-				continue
-
-		running_cred.add(cred_to_use["ig_username"])
-		schedule_job_now(job_id=str(job["_id"]), cred_to_use=cred_to_use, job_type=str(job["type"]))
+		job["specific_username"] = avail_cred.pop()
+		update_job_record(job)
 
 
 def main():

@@ -102,7 +102,8 @@ mongo_db[TABLES["INFLUENCER_DATA"]].create_indexes(index_list)
 ### Table JOB_CONFIG ####
 
 index_list = [
-	IndexModel( [("completion_time", ASCENDING), ("weight", DESCENDING), ("release_time", ASCENDING)])
+	IndexModel( [("completion_time", ASCENDING), ("weight", DESCENDING), ("release_time", ASCENDING)]),
+	IndexModel( [("specific_username", ASCENDING), ("completion_time", ASCENDING), ("weight", DESCENDING), ("release_time", ASCENDING)])
 	]
 
 mongo_db[TABLES["JOB_CONFIG"]].create_indexes(index_list)

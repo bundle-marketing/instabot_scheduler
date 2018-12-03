@@ -186,6 +186,8 @@ def create_job_record(job_type, linked_job_id, specific_username=None, weight=0)
 
 	if specific_username is not None:
 		data["specific_username"] = specific_username
+	else:
+		data["specific_username"] = ""
 
 	data["weight"] = weight
 	data["release_time"] = get_current_time()
