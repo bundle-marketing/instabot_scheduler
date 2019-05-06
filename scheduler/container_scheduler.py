@@ -41,6 +41,9 @@ def run_ig_bot(cred_to_use):
 	if cred_to_use == None:
 		return
 
+	if cred_to_use["ig_username"] == "finallyarbaaz":
+		return
+
 	environment_var = {}
 
 	try:

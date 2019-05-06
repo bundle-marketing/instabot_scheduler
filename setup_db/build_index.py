@@ -9,7 +9,7 @@ import datetime
 sys.path.append(os.path.join(sys.path[0], '../'))
 from db_config.config import (MONGO_DB_URL, MONGO_DB_NAME, TABLES)
 
-from tqdm import tqdm
+# from tqdm import tqdm
 from pymongo import MongoClient, IndexModel, ASCENDING, DESCENDING
 
 
@@ -42,7 +42,8 @@ mongo_db[TABLES["USER_ACTIVITY"]].create_indexes(index_list)
 ### Table USER_FOLLOW ####
 
 index_list = [
-	IndexModel( [("user_name", DESCENDING), ("ig_username", DESCENDING), ("target_user_id", DESCENDING)], name="unique_target", unique=True, dropDups=True),
+	IndexModel( [("user_name", DESCENDING), ("target_user_id", DESCENDING)], name="unique_target_id", unique=True, dropDups=True),
+	IndexModel( [("user_name", DESCENDING), ("ig_username", DESCENDING)], name="unique_target", unique=True, dropDups=True),
 	IndexModel( [("status", ASCENDING), ("weight", DESCENDING)], name="find_next_follow"),
 	IndexModel( [("status", ASCENDING), ("unfollowed_time", DESCENDING), ("weight", DESCENDING)], name="find_next_unfollow")
 	]
@@ -93,7 +94,9 @@ mongo_db[TABLES["IG_CRED"]].create_indexes(index_list)
 ### Table INFLUENCER_DATA ####
 
 index_list = [
-	IndexModel( [("user_id", DESCENDING), ("ig_username", DESCENDING), ("info_at_utc", DESCENDING)], name="unique_data", unique=True, dropDups=True)
+	IndexModel( [("user_id", DESCENDING), ("ig_username", DESCENDING), ("info_at_utc", DESCENDING)], name="unique_data", unique=True, dropDups=True),
+	IndexModel( [("ig_username", DESCENDING), ("info_at_utc", DESCENDING)], name="sorted_ig_username_data"),
+	IndexModel( [("user_id", DESCENDING), ("info_at_utc", DESCENDING)], name="sorted_userd_id_data")
 	]
 
 mongo_db[TABLES["INFLUENCER_DATA"]].create_indexes(index_list)
